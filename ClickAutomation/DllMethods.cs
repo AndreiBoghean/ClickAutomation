@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Numerics;
 using System.Reflection.Emit;
+using System.Data;
 
 namespace ClickAutomation
 {
@@ -19,12 +20,6 @@ namespace ClickAutomation
         [DllImport("user32.dll")]
         private static extern bool SetCursorPos(int X, int Y);
 
-        /*
-        public static void SetCursorPos(dynamic x, dynamic y)
-        {
-            SetCursorPos(Convert.ToInt32(x), Convert.ToInt32(y));
-        }
-        */
         [Flags]
         public enum MouseEventFlags
         {

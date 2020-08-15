@@ -9,20 +9,17 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 
+using System.Windows.Input;
 namespace ClickAutomation
 {
     class Program
     {
-        public static List<Point> TouchPoints = new List<Point>();
-        static void Main()
+        public static List<MacroActions.Action> TouchPoints = new List<MacroActions.Action>();
+        void Main()
         {
             while (true)
             {
-                Console.WriteLine("press enter with this window focused to add mouse pos as a point");
-                Console.ReadLine();
-
-                TouchPoints.Add(System.Windows.Forms.Cursor.Position);
-
+                AddInput();
                 Console.WriteLine("add more? (y / n)");
                 string inp = Console.ReadLine();
 
@@ -33,20 +30,37 @@ namespace ClickAutomation
                 }
                 if (inp == "n") break;
             }
-            Console.WriteLine("what interval do you want to use between each click?");
-            int count = Convert.ToInt32(Regex.Replace(Console.ReadLine(), "^[0-9]", ""));
-            //count = Math.
+            Console.WriteLine("what interval do you want to use between each click? (in ms)");
+            int count = Convert.ToInt32(Regex.Replace(Console.ReadLine(), "[^0-9]", ""));
+            count = Math.Abs(count);
+            Console.WriteLine("press enter to close...."); Console.ReadLine();
+        }
 
-            Console.WriteLine("press enter to begin click routine");
-            Console.ReadLine();
+        public void AddInput()
+        {
+            string Inp = "";
+            bool validInp = false;
 
-            foreach (var position in TouchPoints)
+            while (!validInp)
             {
-                System.Threading.Thread.Sleep(2500);
-                DllMethods.Click(new DllMethods.MouseEventFlags[] { DllMethods.MouseEventFlags.LEFTDOWN, DllMethods.MouseEventFlags.LEFTUP }, position);
+                Console.WriteLine("what input would you like to send, mouse or keyboard? (m / k)");
+                Inp = Console.ReadLine();
+
+                validInp = (Inp == "m" || Inp == "k");
             }
 
-            Console.WriteLine("press enter to close...."); Console.ReadLine();
+            switch (Inp)
+            {
+                case "m":
+                    Console.WriteLine("press enter, with this window focused, to add the current mouse position");
+                    Console.ReadLine();
+                    TouchPoints.Add(new MacroActions.MouseAction(new Point[]{ System.Windows.Forms.Cursor.Position }, MacroActions.MouseAction.MouseActionType.Click) );
+                    break;
+                case "k":
+                    Console.WriteLine("what text would you like to write?");
+                    Inp = Console.ReadLine();
+                    break;
+            }
         }
     }
 }
