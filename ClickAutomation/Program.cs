@@ -36,8 +36,8 @@ namespace ClickAutomation
 
             Console.WriteLine("what interval do you want to use between each click? (in ms)");
             int count = Convert.ToInt32(Regex.Replace(Console.ReadLine(), "[^0-9]", ""));
-            Console.WriteLine("how many times to loop?");
-            loop = int.Parse(Console.ReadLine());
+            Console.WriteLine("how many times would you like to do this?");
+            loop = int.Parse(Regex.Replace(Console.ReadLine(), "[^0-9]", ""));
             Console.WriteLine("press enter to start");
             Console.ReadLine();
             for (int i = 0; i < loop; i++)
