@@ -9,6 +9,7 @@ using System.Numerics;
 using System.Reflection.Emit;
 using System.Data;
 
+using static ClickAutomation.MacroActions;
 namespace ClickAutomation
 {
     
@@ -23,14 +24,20 @@ namespace ClickAutomation
         [Flags]
         public enum MouseEventFlags
         {
-            LEFTDOWN = 0x00000002,
-            LEFTUP = 0x00000004,
-            MIDDLEDOWN = 0x00000020,
-            MIDDLEUP = 0x00000040,
-            MOVE = 0x00000001,
-            ABSOLUTE = 0x00008000,
-            RIGHTDOWN = 0x00000008,
-            RIGHTUP = 0x00000010
+            LEFTDOWN = 0x0002,
+            LEFTUP = 0x0004,
+            RIGHTDOWN = 0x0008,
+            RIGHTUP = 0x0010,
+            MIDDLEDOWN = 0x0020,
+            MIDDLEUP = 0x0040,
+            ABSOLUTE = 0x00008000
+        }
+
+        public static class MouseEventParent
+        {
+            public static readonly MouseEventFlags[] left = new MouseEventFlags[] { MouseEventFlags.LEFTDOWN, MouseEventFlags.LEFTUP };
+            public static readonly MouseEventFlags[] right = new MouseEventFlags[] { MouseEventFlags.RIGHTDOWN, MouseEventFlags.RIGHTUP };
+            public static readonly MouseEventFlags[] middle = new MouseEventFlags[] { MouseEventFlags.MIDDLEDOWN, MouseEventFlags.MIDDLEUP };
         }
 
         public static void Click(MouseEventFlags[] mouseEventFlagsArr, Point Pos)
@@ -43,6 +50,7 @@ namespace ClickAutomation
         {
             SetCursorPos(FirstPos.X, FirstPos.Y);
             mouse_event((int)mouseEventFlagsArr[0]);
+            System.Threading.Thread.Sleep(1000);
             SetCursorPos(SecondPos.X, SecondPos.Y);
             mouse_event((int)mouseEventFlagsArr[1]);
         }

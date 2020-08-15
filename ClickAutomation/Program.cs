@@ -10,56 +10,114 @@ using System.Text.RegularExpressions;
 using System.Threading;
 
 using System.Windows.Input;
+
+using static ClickAutomation.DllMethods;
+using static ClickAutomation.MacroActions;
 namespace ClickAutomation
 {
-    class Program
+    static class Program
     {
-        public static List<MacroActions.Action> TouchPoints = new List<MacroActions.Action>();
-        void Main()
+        public static List<MacroActions.Action> MacroActions = new List<MacroActions.Action>();
+        private static int _loop;
+        static int loop
         {
-            while (true)
+            get
+            { return _loop; }
+            set
+            { if (value  >= 1) { _loop = value; } else { _loop = 1; } }
+        }
+        static void Main()
+        {
+            do
             {
                 AddInput();
-                Console.WriteLine("add more? (y / n)");
-                string inp = Console.ReadLine();
-
-                while (true)
-                {
-                    if ((inp.ToLower() == "y") || (inp.ToLower() == "n")) break;
-                    Console.WriteLine("invalid input, retry input (y / n)");
-                }
-                if (inp == "n") break;
             }
+            while (GetSelection("add more?", new string[] { "y", "n" }) == "y");
+
             Console.WriteLine("what interval do you want to use between each click? (in ms)");
             int count = Convert.ToInt32(Regex.Replace(Console.ReadLine(), "[^0-9]", ""));
-            count = Math.Abs(count);
+            Console.WriteLine("how many times to loop?");
+            loop = int.Parse(Console.ReadLine());
+            Console.WriteLine("press enter to start");
+            Console.ReadLine();
+            for (int i = 0; i < loop; i++)
+            {
+                foreach (var MacroEvent in MacroActions)
+                {
+                    System.Threading.Thread.Sleep(count);
+                    MacroEvent.Execute();
+                }
+            }
             Console.WriteLine("press enter to close...."); Console.ReadLine();
         }
 
-        public void AddInput()
+        public static void AddInput()
         {
-            string Inp = "";
-            bool validInp = false;
-
-            while (!validInp)
-            {
-                Console.WriteLine("what input would you like to send, mouse or keyboard? (m / k)");
-                Inp = Console.ReadLine();
-
-                validInp = (Inp == "m" || Inp == "k");
-            }
-
-            switch (Inp)
+            switch (GetSelection("what input would you like to send, mouse or keyboard ?", new string[]{ "m", "k"}))
             {
                 case "m":
+                    bool IsDrag = "d" == GetSelection("click or drag?", new string[]{ "c", "d" });
+
+                    string selection = GetSelection("what mouse button to press?", new string[] { "l", "r", "m" });
+                    MouseEventFlags[] selected = MouseEventParent.left;
+                    switch (selection)
+                    {
+                        case "l": selected = MouseEventParent.left; break;
+                        case "r": selected = MouseEventParent.right; break;
+                        case "m": selected = MouseEventParent.middle; break;
+                    }
+
+                    Point[] ClickPoints = new Point[2];
                     Console.WriteLine("press enter, with this window focused, to add the current mouse position");
                     Console.ReadLine();
-                    TouchPoints.Add(new MacroActions.MouseAction(new Point[]{ System.Windows.Forms.Cursor.Position }, MacroActions.MouseAction.MouseActionType.Click) );
+                    ClickPoints[0] = System.Windows.Forms.Cursor.Position;
+                    if (IsDrag)
+                    {
+                        Console.WriteLine("press enter, with this window focused, to add the current mouse position");
+                        Console.ReadLine();
+                        ClickPoints[1] = System.Windows.Forms.Cursor.Position;
+                        MacroActions.Add(new MacroActions.MouseAction(ClickPoints, 'd', selected));
+                    }
+                    else
+                    {
+                        MacroActions.Add(new MacroActions.MouseAction(ClickPoints, 'c', selected));
+                    }
                     break;
+
                 case "k":
-                    Console.WriteLine("what text would you like to write?");
-                    Inp = Console.ReadLine();
+                    Console.WriteLine("what text would you like to type?");
+                    MacroActions.Add(new KeyboardAction(Console.ReadLine()));
                     break;
+            }
+        }
+
+        static string GetSelection(string question, string[] matches)
+        {
+            question += " (";
+            foreach (var charc in matches)
+            {
+                question += " / " + charc;
+            }
+            question += ")";
+            question = Regex.Replace(question, "\\( / ", "(");
+            question = Regex.Replace(question, " / \\)", ")");
+            string Inp = "";
+
+            while (true)
+            {
+                Console.WriteLine(question);
+                Inp = Console.ReadLine().ToLower();
+
+                if (matches.Any(match => match == Inp))
+                {
+                    return Inp;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine("invalid input, try again");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
             }
         }
     }

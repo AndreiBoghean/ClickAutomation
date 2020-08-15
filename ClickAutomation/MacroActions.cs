@@ -4,7 +4,10 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
+using static ClickAutomation.DllMethods;
+using SendKeys = System.Windows.Forms.SendKeys;
 namespace ClickAutomation
 {
     class MacroActions
@@ -16,16 +19,14 @@ namespace ClickAutomation
 
         public class MouseAction : Action
         {
-            public enum MouseActionType
-            {
-                Click, Drag
-            }
-            private Point[] ClickPoints;
-            private MouseActionType SelectedMouseAction;
 
-            public MouseAction(Point[] Points, MouseActionType actionType)
+            private Point[] ClickPoints;
+            private char SelectedMouseAction;
+            private MouseEventFlags[] BtnsToClick;
+            public MouseAction(Point[] Points, char actionType, MouseEventFlags[] ButtonToClick)
             {
                 ClickPoints = Points;
+                BtnsToClick = ButtonToClick;
                 SelectedMouseAction = actionType;
             }
 
@@ -33,12 +34,24 @@ namespace ClickAutomation
             {
                 switch (SelectedMouseAction)
                 {
-                    case MouseActionType.Click:
-                        DllMethods.Click( new DllMethods.MouseEventFlags[]{ DllMethods.MouseEventFlags.LEFTDOWN, DllMethods.MouseEventFlags.LEFTUP}, ClickPoints[0]);
+                    case 'c':
+                        Click( BtnsToClick, ClickPoints[0]);
                         break;
-                    case MouseActionType.Drag:
+                    case 'd':
+                        Drag(BtnsToClick, ClickPoints[0], ClickPoints[1]);
                         break;
                 }
+            }
+        }
+
+        public class KeyboardAction : Action
+        {
+            string str = "";
+            public KeyboardAction(string inp)
+            { str = inp; }
+            public override void Execute()
+            {
+                SendKeys.SendWait(str);
             }
         }
 
